@@ -1,0 +1,19 @@
+{
+  "name": "web-crawler",
+  "version": "1.0.0",
+  "description": "A web crawler built in Node.js",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eneax/web-crawler.git"
+  },
+  "author": "eneax",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/eneax/web-crawler/issues"
+  },
+  "homepage": "https://github.com/eneax/web-crawler#readme"
+}
