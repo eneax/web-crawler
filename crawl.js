@@ -37,17 +37,36 @@ function getURLsFromHTML(htmlBody, baseURL) {
   return urls;
 }
 
-async function crawlPage(currentURL) {
+async function crawlPage(baseURL, currentURL, pages) {
+  // Skip external URLs
+  const baseURLObj = new URL(baseURL);
+  const currentURLObj = new URL(currentURL);
+  if (baseURLObj.hostname !== currentURLObj.hostname) {
+    return pages;
+  }
+
+  const normalizedCurrentURL = normalizeURL(currentURL);
+
+  // If we have already crawled this page, increment the count and return
+  if (pages[normalizedCurrentURL] > 0) {
+    pages[normalizedCurrentURL]++;
+    return pages;
+  }
+
+  // Add the page to the list of crawled pages
+  pages[normalizedCurrentURL] = 1;
+
+  // Fetch and parse the HTML of the current page
   console.log(`Crawling: ${currentURL}`);
+  let htmlBody = "";
 
   try {
     const response = await fetch(currentURL);
-
     if (response.status > 399) {
       console.error(
         `Error fetching with status code ${response.status} on page: ${currentURL}`
       );
-      return;
+      return pages;
     }
 
     const contentType = response.headers.get("content-type");
@@ -55,13 +74,20 @@ async function crawlPage(currentURL) {
       console.error(
         `Skipping non-HTML page: ${currentURL} (content-type: ${contentType})`
       );
-      return;
+      return pages;
     }
 
-    console.log(await response.text());
+    htmlBody = await response.text();
   } catch (error) {
     console.error(`Error fetching ${currentURL}: ${error.message}`);
   }
+
+  const nextURLs = getURLsFromHTML(htmlBody, baseURL);
+  for (const nextURL of nextURLs) {
+    pages = await crawlPage(baseURL, nextURL, pages);
+  }
+
+  return pages;
 }
 
 module.exports = {
